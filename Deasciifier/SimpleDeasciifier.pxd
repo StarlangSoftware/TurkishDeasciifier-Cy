@@ -1,9 +1,10 @@
 from MorphologicalAnalysis.FsmMorphologicalAnalyzer cimport FsmMorphologicalAnalyzer
 from Dictionary.Word cimport Word
 from Corpus.Sentence cimport Sentence
+from Deasciifier.Deasciifier cimport Deasciifier
 
 
-cdef class SimpleDeasciifier:
+cdef class SimpleDeasciifier(Deasciifier):
 
     cdef FsmMorphologicalAnalyzer fsm
 

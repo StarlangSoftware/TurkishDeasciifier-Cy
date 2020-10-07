@@ -3,7 +3,7 @@ from random import randrange
 from MorphologicalAnalysis.FsmParseList cimport FsmParseList
 
 
-cdef class SimpleDeasciifier:
+cdef class SimpleDeasciifier(Deasciifier):
 
     def __init__(self, fsm: FsmMorphologicalAnalyzer):
         """
