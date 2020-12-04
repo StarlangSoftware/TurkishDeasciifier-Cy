@@ -10,8 +10,9 @@ from Deasciifier.SimpleDeasciifier cimport SimpleDeasciifier
 cdef class NGramDeasciifier(SimpleDeasciifier):
 
     cdef NGram __nGram
+    cdef bint __rootNgram
 
-    def __init__(self, fsm: FsmMorphologicalAnalyzer, nGram: NGram):
+    def __init__(self, fsm: FsmMorphologicalAnalyzer, nGram: NGram, rootNGram: bool):
         """
         A constructor of NGramDeasciifier class which takes an FsmMorphologicalAnalyzer and an NGram
         as inputs. It first calls it super class SimpleDeasciifier with given FsmMorphologicalAnalyzer input
@@ -26,6 +27,7 @@ cdef class NGramDeasciifier(SimpleDeasciifier):
         """
         super().__init__(fsm)
         self.__nGram = nGram
+        self.__rootNgram = rootNGram
 
     cpdef Word checkAnalysisAndSetRoot(self, Sentence sentence, int index):
         """
@@ -39,7 +41,10 @@ cdef class NGramDeasciifier(SimpleDeasciifier):
         if index < sentence.wordCount():
             fsmParses = self.fsm.morphologicalAnalysis(sentence.getWord(index).getName())
             if fsmParses.size() != 0:
-                return fsmParses.getParseWithLongestRootWord().getWord()
+                if self.__rootNgram:
+                    return fsmParses.getParseWithLongestRootWord().getWord()
+                else:
+                    return sentence.getWord(index)
         return None
 
     cpdef Sentence deasciify(self, Sentence sentence):
@@ -82,7 +87,10 @@ cdef class NGramDeasciifier(SimpleDeasciifier):
                 bestProbability = 0
                 for candidate in candidates:
                     fsmParses = self.fsm.morphologicalAnalysis(candidate)
-                    root = fsmParses.getParseWithLongestRootWord().getWord()
+                    if self.__rootNgram:
+                        root = fsmParses.getParseWithLongestRootWord().getWord()
+                    else:
+                        root = Word(candidate)
                     if previousRoot is not None:
                         previousProbability = self.__nGram.getProbability(previousRoot.getName(), root.getName())
                     else:
