@@ -5,7 +5,7 @@ setup(
     ext_modules=cythonize(["Deasciifier/*.pyx"],
                           compiler_directives={'language_level': "3"}),
     name='NlpToolkit-Deasciifier-Cy',
-    version='1.0.5',
+    version='1.0.6',
     packages=['Deasciifier'],
     package_data={'Deasciifier': ['*.pxd', '*.pyx', '*.c']},
     url='https://github.com/olcaytaner/TurkishDeasciifier-Cy',
