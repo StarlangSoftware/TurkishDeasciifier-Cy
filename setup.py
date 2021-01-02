@@ -8,7 +8,7 @@ setup(
     version='1.0.6',
     packages=['Deasciifier'],
     package_data={'Deasciifier': ['*.pxd', '*.pyx', '*.c']},
-    url='https://github.com/olcaytaner/TurkishDeasciifier-Cy',
+    url='https://github.com/StarlangSoftware/TurkishDeasciifier-Cy',
     license='',
     author='olcaytaner',
     author_email='olcay.yildiz@ozyegin.edu.tr',
