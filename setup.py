@@ -10,8 +10,8 @@ setup(
     package_data={'Deasciifier': ['*.pxd', '*.pyx', '*.c']},
     url='https://github.com/olcaytaner/TurkishDeasciifier-Cy',
     license='',
-    author='olcay',
-    author_email='olcaytaner@isikun.edu.tr',
+    author='olcaytaner',
+    author_email='olcay.yildiz@ozyegin.edu.tr',
     description='Turkish Asciifier/Deasciifier Library',
     install_requires=['NlpToolkit-MorphologicalAnalysis-Cy', 'NlpToolkit-NGram-Cy']
 )
