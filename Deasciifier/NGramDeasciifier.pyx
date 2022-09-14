@@ -4,6 +4,7 @@ from MorphologicalAnalysis.FsmMorphologicalAnalyzer cimport FsmMorphologicalAnal
 from MorphologicalAnalysis.FsmParseList cimport FsmParseList
 from NGram.NGram cimport NGram
 
+import pkg_resources
 from Deasciifier.SimpleDeasciifier cimport SimpleDeasciifier
 
 
@@ -12,6 +13,7 @@ cdef class NGramDeasciifier(SimpleDeasciifier):
     cdef NGram __nGram
     cdef bint __rootNgram
     cdef float __threshold
+    cdef dict __asciifiedSame
 
     def __init__(self, fsm: FsmMorphologicalAnalyzer, nGram: NGram, rootNGram: bool):
         """
@@ -30,6 +32,8 @@ cdef class NGramDeasciifier(SimpleDeasciifier):
         self.__nGram = nGram
         self.__rootNgram = rootNGram
         self.__threshold = 0.0
+        self.__asciifiedSame = {}
+        self.loadAsciifiedSameList()
 
     cpdef Word checkAnalysisAndSetRoot(self, Sentence sentence, int index):
         """
@@ -74,45 +78,69 @@ cdef class NGramDeasciifier(SimpleDeasciifier):
         """
         cdef str bestCandidate, candidate
         cdef Sentence result
-        cdef int i
+        cdef int i, repeat
         cdef Word previousRoot, word, bestRoot, root, nextRoot
         cdef FsmParseList fsmParses
         cdef list candidates
         cdef double bestProbability, previousProbability, nextProbability
+        cdef bint isAsciifiedSame
         previousRoot = None
         result = Sentence()
         root = self.checkAnalysisAndSetRoot(sentence, 0)
         nextRoot = self.checkAnalysisAndSetRoot(sentence, 1)
-        for i in range(sentence.wordCount()):
-            word = sentence.getWord(i)
-            if root is None:
-                candidates = self.candidateList(word)
-                bestCandidate = word.getName()
-                bestRoot = word
-                bestProbability = self.__threshold
-                for candidate in candidates:
-                    fsmParses = self.fsm.morphologicalAnalysis(candidate)
-                    if self.__rootNgram:
-                        root = fsmParses.getParseWithLongestRootWord().getWord()
-                    else:
-                        root = Word(candidate)
-                    if previousRoot is not None:
-                        previousProbability = self.__nGram.getProbability(previousRoot.getName(), root.getName())
-                    else:
-                        previousProbability = 0.0
-                    if nextRoot is not None:
-                        nextProbability = self.__nGram.getProbability(root.getName(), nextRoot.getName())
-                    else:
-                        nextProbability = 0.0
-                    if max(previousProbability, nextProbability) > bestProbability:
-                        bestCandidate = candidate
-                        bestRoot = root
-                        bestProbability = max(previousProbability, nextProbability)
-                root = bestRoot
-                result.addWord(Word(bestCandidate))
-            else:
-                result.addWord(word)
-            previousRoot = root
-            root = nextRoot
-            nextRoot = self.checkAnalysisAndSetRoot(sentence, i + 2)
+        for repeat in range(2):
+            for i in range(sentence.wordCount()):
+                candidates = []
+                isAsciifiedSame = False
+                word = sentence.getWord(i)
+                if word.getName() in self.__asciifiedSame:
+                    candidates.append(word.getName())
+                    candidates.append(self.__asciifiedSame[word.getName()])
+                    isAsciifiedSame = True
+                if root is None or isAsciifiedSame:
+                    if not isAsciifiedSame:
+                        candidates = self.candidateList(word)
+                    bestCandidate = word.getName()
+                    bestRoot = word
+                    bestProbability = self.__threshold
+                    for candidate in candidates:
+                        fsmParses = self.fsm.morphologicalAnalysis(candidate)
+                        if self.__rootNgram and not isAsciifiedSame:
+                            root = fsmParses.getParseWithLongestRootWord().getWord()
+                        else:
+                            root = Word(candidate)
+                        if previousRoot is not None:
+                            previousProbability = self.__nGram.getProbability(previousRoot.getName(), root.getName())
+                        else:
+                            previousProbability = 0.0
+                        if nextRoot is not None:
+                            nextProbability = self.__nGram.getProbability(root.getName(), nextRoot.getName())
+                        else:
+                            nextProbability = 0.0
+                        if max(previousProbability, nextProbability) > bestProbability:
+                            bestCandidate = candidate
+                            bestRoot = root
+                            bestProbability = max(previousProbability, nextProbability)
+                    root = bestRoot
+                    result.addWord(Word(bestCandidate))
+                else:
+                    result.addWord(word)
+                previousRoot = root
+                root = nextRoot
+                nextRoot = self.checkAnalysisAndSetRoot(sentence, i + 2)
+            sentence = result
+            if repeat < 1:
+                result = Sentence()
+                previousRoot = None
+                root = self.checkAnalysisAndSetRoot(sentence, 0)
+                nextRoot = self.checkAnalysisAndSetRoot(sentence, 1)
         return result
+
+    cpdef loadAsciifiedSameList(self):
+        cdef str line
+        inputFile = open(pkg_resources.resource_filename(__name__, 'data/asciified-same.txt'), "r", encoding="utf8")
+        lines = inputFile.readlines()
+        for line in lines:
+            items = line.strip().split(" ")
+            self.__asciifiedSame[items[0]] = items[1]
+        inputFile.close()
