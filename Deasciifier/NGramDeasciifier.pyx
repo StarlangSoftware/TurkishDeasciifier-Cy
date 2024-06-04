@@ -59,6 +59,10 @@ cdef class NGramDeasciifier(SimpleDeasciifier):
         return None
 
     cpdef setThreshold(self, float threshold):
+        """
+        Sets minimum N-Gram probability threshold for replacement candidates.
+        :param threshold: New N-Gram probability threshold
+        """
         self.__threshold = threshold
 
     cpdef Sentence deasciify(self, Sentence sentence):
@@ -135,6 +139,10 @@ cdef class NGramDeasciifier(SimpleDeasciifier):
         return result
 
     cpdef loadAsciifiedSameList(self):
+        """
+        Loads asciified same word list. Asciified same words are the words whose asciified versions are also
+        valid Turkish words. For example, ascified version of 'ekşi' is 'eksi', ascified version of 'fön' is 'fon'.
+        """
         cdef str line
         input_file = open(pkg_resources.resource_filename(__name__, 'data/asciified-same.txt'), "r", encoding="utf8")
         lines = input_file.readlines()
