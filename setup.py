@@ -9,7 +9,7 @@ setup(
     ext_modules=cythonize(["Deasciifier/*.pyx"],
                           compiler_directives={'language_level': "3"}),
     name='NlpToolkit-Deasciifier-Cy',
-    version='1.0.11',
+    version='1.0.12',
     packages=['Deasciifier'],
     package_data={'Deasciifier': ['*.pxd', '*.pyx', '*.c'],
                   'Deasciifier.data': ['*.txt']},
