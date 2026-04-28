@@ -8,8 +8,8 @@ from Cython.Build import cythonize
 setup(
     ext_modules=cythonize(["Deasciifier/*.pyx"],
                           compiler_directives={'language_level': "3"}),
-    name='nlptoolkit-deasciifier-cy',
-    version='1.0.13',
+    name='nlptoolkit_deasciifier_cy',
+    version='1.0.14',
     packages=['Deasciifier'],
     package_data={'Deasciifier': ['*.pxd', '*.pyx', '*.c'],
                   'Deasciifier.data': ['*.txt']},
